@@ -20,3 +20,10 @@ Thumbs.db
 
 # Note: outputs/, *.png, *.step, *.stl, *.scad などの生成ファイルは
 # Gitに含めるため、除外していません
+
+# Debug files
+debug/
+outputs/debug/
+outputs/debug_axis/
+outputs/verify/
+outputs/analysis/
