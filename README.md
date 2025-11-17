@@ -159,6 +159,19 @@ batch_save_models(models, output_dir="outputs/solidpython")
 - headlessレンダリング可能
 - パラメトリック設計
 
+### DXF形式 (.dxf)
+- 2D CAD標準フォーマット
+- AutoCAD等の2D CADソフトで編集可能
+- CadQueryでは3Dモデルの2D断面を出力
+- 断面平面: XY（トップビュー）、XZ（フロントビュー）、YZ（サイドビュー）
+- レーザーカット用の図面作成に最適
+
+### SVG形式 (.svg)
+- ベクター画像フォーマット
+- ブラウザで表示可能
+- 3D投影をサポート
+- 技術文書やプレゼンテーションに最適
+
 ## コマンドラインオプション
 
 `scripts/renderer.py`のオプション:
@@ -199,6 +212,21 @@ hole = translate([0, 0, 0])(cylinder(h=12, r=5, center=True))
 part = base - hole
 
 save_model_with_2d(part, "simple_part", "outputs/solidpython")
+```
+
+### DXF断面エクスポート
+
+```python
+import cadquery as cq
+from scripts.cadquery_utils import export_dxf
+
+# 3Dモデル作成
+model = cq.Workplane("XY").box(80, 60, 10)
+
+# 各断面をDXFエクスポート
+export_dxf(model, "outputs/top_view.dxf", section_plane="XY")    # トップビュー
+export_dxf(model, "outputs/front_view.dxf", section_plane="XZ")  # フロントビュー
+export_dxf(model, "outputs/side_view.dxf", section_plane="YZ")   # サイドビュー
 ```
 
 ## 参考リンク

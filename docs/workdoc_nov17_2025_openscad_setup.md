@@ -246,3 +246,17 @@ git push -u origin claude/setup-openscad-headless-01RnaY75xE1ShRuRMRBDZBJu
 | 2025-11-17 | 07:02:30 UTC | Claude | 画像ファイル移動続き | CadQuery1枚→outputs/cadquery/, OpenSCAD5枚→outputs/openscad/ |
 | 2025-11-17 | 07:03:00 UTC | Claude | 不要ディレクトリ削除 | examples/solidpython/outputs/ を削除（誤配置された6SCADファイル） |
 | 2025-11-17 | 07:05:00 UTC | Claude | **画像整理完了** | **[COMPLETE] 全16個のPNG画像をoutputs/適切なサブディレクトリに配置完了** |
+| 2025-11-17 | 07:10:00 UTC | Claude | README.md 簡素化 | 開発原則とカラースキーム章を削除（ユーザー要望による） |
+| 2025-11-17 | 07:15:00 UTC | Claude | DXFエクスポート調査開始 | GitHub issues #122, #1767, #1316を調査、2D CAD出力機能の詳細確認 |
+| 2025-11-17 | 07:20:00 UTC | Claude | DXF機能の問題発見 | projectToWorkplane()メソッドが存在しない、DXFは2D断面のみサポートと判明 |
+| 2025-11-17 | 07:22:00 UTC | Claude | 後処理ワークフロー調査 | FreeCAD TechDraw（手動）、ezdxf（プログラマティック）の2つの方法を確認 |
+| 2025-11-17 | 07:25:00 UTC | Claude | export_dxf()関数修正開始 | section()メソッドベースのアプローチに変更、XY/XZ/YZ断面をサポート |
+| 2025-11-17 | 07:28:00 UTC | Claude | export_svg()関数修正 | projectToWorkplane()を削除、projectionDirパラメータで直接出力 |
+| 2025-11-17 | 07:30:00 UTC | Claude | テストスクリプト作成 | test_dxf_export.py 作成、L字ブラケットで3断面+2Dスケッチをテスト |
+| 2025-11-17 | 07:32:00 UTC | Claude | 初回テスト実行 | [PARTIAL] 3D断面3/3成功、SVGエラー、2Dスケッチ失敗 |
+| 2025-11-17 | 07:35:00 UTC | Claude | 2Dスケッチ検出修正 | solids()メソッドでソリッド有無をチェックするロジックに変更 |
+| 2025-11-17 | 07:38:00 UTC | Claude | 再テスト実行 | [SUCCESS] 全テスト成功: 3D断面3種、2Dスケッチ、SVG全て正常出力 |
+| 2025-11-17 | 07:40:00 UTC | Claude | 出力ファイル確認 | outputs/test_dxf/ に8ファイル生成: DXF 4種（15-16KB）、STEP/STL/SVG |
+| 2025-11-17 | 07:42:00 UTC | Claude | README.md DXF/SVG章追加 | ファイル形式セクションにDXF（断面平面詳細）とSVG形式の説明を追加 |
+| 2025-11-17 | 07:45:00 UTC | Claude | README.md サンプル追加 | DXF断面エクスポートのコード例を追加（XY/XZ/YZ各断面の使用方法） |
+| 2025-11-17 | 07:48:00 UTC | Claude | **DXF機能修正完了** | **[COMPLETE] export_dxf/svg修正、テスト成功、ドキュメント更新完了** |
