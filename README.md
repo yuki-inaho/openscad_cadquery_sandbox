@@ -141,6 +141,51 @@ models = {
 batch_save_models(models, output_dir="outputs/solidpython")
 ```
 
+### scripts/dxf_parser.py / svg_parser.py
+
+DXF/SVGファイルをパースして設計情報を抽出:
+
+```python
+from scripts.dxf_parser import parse_dxf
+from scripts.svg_parser import parse_svg
+
+# DXFファイル解析
+dxf_parser = parse_dxf("outputs/model_xy.dxf", "dxf_report.txt")
+# エンティティ情報（LINE, CIRCLE, ARC等）を抽出
+circles = dxf_parser.get_circles()
+lines = dxf_parser.get_lines()
+
+# SVGファイル解析
+svg_parser = parse_svg("outputs/model_top.svg", "svg_report.txt")
+# 要素情報（path, circle, rect等）を抽出
+paths = svg_parser.get_paths()
+```
+
+## 設計フィードバックループワークフロー
+
+DXF/SVGパーサーを使用して、設計→エクスポート→解析→フィードバックのループを自動化:
+
+```bash
+# ワークフロー実行
+python3 examples/workflow/design_feedback_loop.py
+
+# 統合レポートが生成される
+# outputs/workflow/reports/SUMMARY_REPORT.txt
+```
+
+ワークフローの流れ:
+1. CadQueryでパラメトリックモデル設計
+2. STEP/STL/DXF（3断面）/SVG形式でエクスポート
+3. DXF/SVGをパースして詳細情報を抽出
+4. テキストレポート生成（Claude Codeで読み取り可能）
+5. レポートを基に設計を検証・改善
+
+生成されるレポート内容:
+- エンティティ統計（LINE、CIRCLE、ARC等の数）
+- 寸法情報（座標、長さ、半径、角度）
+- バウンディングボックス
+- ファイルサイズとバージョン
+
 ## ファイル形式
 
 ### STEP形式 (.step)

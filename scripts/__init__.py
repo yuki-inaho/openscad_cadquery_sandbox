@@ -5,6 +5,8 @@ OpenSCAD Sandbox Scripts Package
 - renderer: OpenSCADレンダリング共通モジュール
 - cadquery_utils: CadQuery共通ユーティリティ
 - solidpython_utils: SolidPython共通ユーティリティ
+- dxf_parser: DXFファイル解析モジュール
+- svg_parser: SVGファイル解析モジュール
 """
 
 from .renderer import OpenSCADRenderer, render_multiple_views
@@ -23,6 +25,8 @@ from .solidpython_utils import (
     create_multiple_2d_projections,
     batch_save_models,
 )
+from .dxf_parser import DXFParser, parse_dxf
+from .svg_parser import SVGParser, parse_svg
 
 __all__ = [
     # renderer
@@ -41,4 +45,10 @@ __all__ = [
     "save_model_with_2d",
     "create_multiple_2d_projections",
     "batch_save_models",
+    # dxf_parser
+    "DXFParser",
+    "parse_dxf",
+    # svg_parser
+    "SVGParser",
+    "parse_svg",
 ]
