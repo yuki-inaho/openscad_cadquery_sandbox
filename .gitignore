@@ -31,3 +31,5 @@ outputs/analysis/
 # Test files
 outputs/test_simple/
 outputs/tests/
+outputs/verify_shape/
+outputs/test_requirements/
