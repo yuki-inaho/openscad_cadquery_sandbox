@@ -51,23 +51,48 @@ def export_stl(model, output_path: str):
         return False
 
 
-def export_dxf(model, output_path: str):
+def export_dxf(model, output_path: str, section_plane: str = "XY"):
     """
-    DXF形式でエクスポート（2D CAD用）
+    DXF形式でエクスポート（2D断面専用）
+
+    注意: DXFエクスポートは2D断面のみ対応。3D投影機能はありません。
+    3D投影が必要な場合はexport_svg()を使用してください。
 
     Args:
-        model: CadQueryモデル
+        model: CadQueryモデル（3Dまたは2D）
         output_path: 出力ファイルパス
+        section_plane: 断面平面 ("XY", "XZ", "YZ")
 
     Returns:
         bool: 成功時True
     """
     try:
-        cq.exporters.export(
-            model.projectToWorkplane(cq.Workplane("XY")),
-            output_path
-        )
-        print(f"[SUCCESS] DXF export: {output_path}")
+        # 3Dソリッドがあるかチェック
+        try:
+            solids = model.solids().vals()
+            has_solids = len(solids) > 0
+        except:
+            has_solids = False
+
+        # 3Dモデルの場合は断面を取得
+        if has_solids:
+            # 平面に応じてモデルを回転
+            if section_plane == "XY":
+                section = model.section()
+            elif section_plane == "XZ":
+                section = model.rotate((0,0,0), (1,0,0), 90).section()
+            elif section_plane == "YZ":
+                section = model.rotate((0,0,0), (0,1,0), 90).section()
+            else:
+                section = model.section()
+
+            cq.exporters.export(section, output_path)
+            print(f"[SUCCESS] DXF export ({section_plane} section): {output_path}")
+        else:
+            # 2Dスケッチやワイヤーの場合はそのまま出力
+            cq.exporters.export(model, output_path)
+            print(f"[SUCCESS] DXF export (2D): {output_path}")
+
         return True
     except Exception as e:
         print(f"[WARNING] DXF export failed: {e}")
@@ -98,11 +123,7 @@ def export_svg(model, output_path: str, svg_opts: dict = None):
         }
 
     try:
-        cq.exporters.export(
-            model.projectToWorkplane(cq.Workplane("XY")),
-            output_path,
-            opt=svg_opts
-        )
+        cq.exporters.export(model, output_path, opt=svg_opts)
         print(f"[SUCCESS] SVG export: {output_path}")
         return True
     except Exception as e:
