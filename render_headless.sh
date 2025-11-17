@@ -37,7 +37,7 @@ RENDER_EXIT_CODE=$?
 kill $XVFB_PID
 
 if [ $RENDER_EXIT_CODE -eq 0 ]; then
-    echo "✓ Rendering completed successfully!"
+    echo "[SUCCESS] Rendering completed successfully!"
     echo "Output saved to: $OUTPUT_PNG"
 
     if [ -f "$OUTPUT_PNG" ]; then
@@ -45,6 +45,6 @@ if [ $RENDER_EXIT_CODE -eq 0 ]; then
         echo "File size: $FILE_SIZE"
     fi
 else
-    echo "✗ Rendering failed with exit code $RENDER_EXIT_CODE"
+    echo "[FAILED] Rendering failed with exit code $RENDER_EXIT_CODE"
     exit $RENDER_EXIT_CODE
 fi

@@ -100,7 +100,7 @@ def render_animation_frames(scad_file: str, output_dir: str = "animation", num_f
                 imgsize=(1920, 1080)
             )
 
-    print(f"\n✓ Generated {num_frames} frames in {output_dir}/")
+    print(f"\n[SUCCESS] Generated {num_frames} frames in {output_dir}/")
     print(f"Create video with: ffmpeg -framerate 24 -i {output_dir}/frame_%03d.png -c:v libx264 -pix_fmt yuv420p output.mp4")
 
 
@@ -179,4 +179,4 @@ if __name__ == "__main__":
         print("\n=== Comparing render modes ===")
         compare_render_modes(scad_file)
 
-    print("\n✓ All rendering tasks completed!")
+    print("\n[SUCCESS] All rendering tasks completed!")

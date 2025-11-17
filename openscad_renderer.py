@@ -109,21 +109,21 @@ class OpenSCADRenderer:
             )
 
             if result.returncode == 0 and Path(output_file).exists():
-                print(f"✓ Rendered successfully: {output_file}")
+                print(f"[SUCCESS] Rendered successfully: {output_file}")
                 file_size = Path(output_file).stat().st_size
                 print(f"  File size: {file_size / 1024:.1f} KB")
                 return True
             else:
-                print(f"✗ Rendering failed", file=sys.stderr)
+                print(f"[FAILED] Rendering failed", file=sys.stderr)
                 if result.stderr:
                     print(result.stderr, file=sys.stderr)
                 return False
 
         except subprocess.TimeoutExpired:
-            print("✗ Rendering timed out", file=sys.stderr)
+            print("[FAILED] Rendering timed out", file=sys.stderr)
             return False
         except Exception as e:
-            print(f"✗ Error during rendering: {e}", file=sys.stderr)
+            print(f"[ERROR] Error during rendering: {e}", file=sys.stderr)
             return False
 
     def __enter__(self):

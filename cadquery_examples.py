@@ -168,7 +168,7 @@ def save_model_all_formats(model, name_prefix, output_dir="cadquery_outputs"):
         cq.exporters.export(model.projectToWorkplane(cq.Workplane("XY")), dxf_path)
         print(f"   → {dxf_path} (DXF形式 - トップビュー)")
     except Exception as e:
-        print(f"   ⚠ DXF出力でエラー: {e}")
+        print(f"   [WARNING] DXF出力でエラー: {e}")
 
     # SVG形式で保存（2D図面）
     try:
@@ -188,7 +188,7 @@ def save_model_all_formats(model, name_prefix, output_dir="cadquery_outputs"):
         )
         print(f"   → {svg_path} (SVG形式 - トップビュー)")
     except Exception as e:
-        print(f"   ⚠ SVG出力でエラー: {e}")
+        print(f"   [WARNING] SVG出力でエラー: {e}")
 
 
 def convert_to_openscad(model, output_path):
@@ -256,7 +256,7 @@ def main():
     convert_to_openscad(bracket, "cadquery_outputs/cq_bracket_for_openscad.scad")
     print()
 
-    print("✓ すべてのモデル生成が完了しました！")
+    print("[SUCCESS] すべてのモデル生成が完了しました!")
     print("\n生成されたファイル:")
     print("  - STEP形式: CADソフトで編集可能")
     print("  - STL形式: 3Dプリント用")

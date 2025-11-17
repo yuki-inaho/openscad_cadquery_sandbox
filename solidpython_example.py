@@ -141,7 +141,7 @@ def main():
     create_2d_projection_file("box.scad", "box_2d.scad")
     create_2d_projection_file("gear.scad", "gear_2d.scad")
 
-    print("\n✓ すべてのモデル生成が完了しました！")
+    print("\n[SUCCESS] すべてのモデル生成が完了しました!")
     print("\n次のステップ:")
     print("  - 3D画像: python3 openscad_renderer.py mechanical_part.scad mechanical_part_3d.png")
     print("  - 2D図面: python3 openscad_renderer.py mechanical_part_2d.scad mechanical_part_2d.png")

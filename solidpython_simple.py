@@ -139,7 +139,7 @@ def main():
     save_model_and_2d(gear, "gear_shape")
     print()
 
-    print("✓ すべてのモデル生成が完了しました！\n")
+    print("[SUCCESS] すべてのモデル生成が完了しました!\n")
     print("次のステップ: レンダリング")
     print("  3D画像の生成:")
     print("    python3 openscad_renderer.py mech_part_3d.scad mech_part_3d.png")
