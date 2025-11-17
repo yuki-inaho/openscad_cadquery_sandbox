@@ -1,324 +1,235 @@
 # OpenSCAD Headless Renderer with SolidPython & CadQuery
 
-This repository contains tools for running OpenSCAD in headless mode, rendering images locally, and generating 3D models using SolidPython and CadQuery.
+パラメトリック3Dモデリングとheadlessレンダリングのための統合環境。OpenSCAD、SolidPython、CadQueryをサポート。
 
-## Installed Packages
-
-The following packages are installed:
-
-- `openscad` (2021.01): 3D modeling software
-- `xvfb`: Virtual framebuffer (required for headless execution)
-- `xauth`: X authentication utility
-- `mesa-utils`: OpenGL utilities
-- `libgl1-mesa-dri`: Mesa DRI driver
-- `solidpython2`: Python library for OpenSCAD
-- `cadquery`: Python-based parametric CAD library using OCCT
-
-## File Structure
+## ディレクトリ構造
 
 ```
 .
-├── README.md                   # This file
-├── test.scad                   # Test OpenSCAD file
-├── render_headless.sh          # Bash rendering script
-├── openscad_renderer.py        # Python rendering wrapper
-├── example_advanced.py         # Advanced usage examples
-├── solidpython_simple.py       # Simple SolidPython examples
-├── solidpython_example.py      # Advanced SolidPython examples
-└── cadquery_examples.py        # CadQuery examples with STEP/STL export
+├── scripts/                    # 再利用可能な共通モジュール
+│   ├── renderer.py            # OpenSCADレンダリング機能
+│   ├── cadquery_utils.py      # CadQuery共通ユーティリティ
+│   └── solidpython_utils.py   # SolidPython共通ユーティリティ
+├── examples/                   # サンプルスクリプト
+│   ├── openscad/              # OpenSCAD例
+│   │   ├── test.scad
+│   │   └── example_advanced.py
+│   ├── solidpython/           # SolidPython例
+│   │   ├── solidpython_simple.py
+│   │   └── solidpython_example.py
+│   └── cadquery/              # CadQuery例
+│       ├── cadquery_examples.py
+│       └── l_bracket_camera_mount.py
+├── outputs/                    # 生成ファイル出力先
+│   ├── openscad/
+│   ├── solidpython/
+│   ├── cadquery/
+│   └── l_bracket/
+├── tools/                      # ツールスクリプト
+│   └── render_headless.sh
+└── docs/                       # ドキュメント
+    └── workdoc_nov17_2025_openscad_setup.md
 ```
 
-## Usage
+## インストール済みパッケージ
 
-### 1. Bash Script Execution
+- `openscad` (2021.01): 3Dモデリングソフトウェア
+- `xvfb`: 仮想フレームバッファ（headless実行に必要）
+- `xauth`: X認証ユーティリティ
+- `mesa-utils`: OpenGLユーティリティ
+- `libgl1-mesa-dri`: Mesa DRIドライバ
+- `solidpython2`: OpenSCAD用Pythonライブラリ
+- `cadquery`: OCCT使用のパラメトリックCADライブラリ
+
+## クイックスタート
+
+### 1. OpenSCADレンダリング
 
 ```bash
-./render_headless.sh <input.scad> <output.png>
+# Pythonレンダラーを使用
+python3 scripts/renderer.py examples/openscad/test.scad output.png
+
+# オプション指定
+python3 scripts/renderer.py examples/openscad/test.scad output.png \
+    --imgsize 1920 1080 \
+    --colorscheme Tomorrow \
+    --projection p
+
+# Bashスクリプトを使用
+tools/render_headless.sh examples/openscad/test.scad output.png
 ```
 
-Example:
+### 2. CadQueryで3Dモデル生成
+
 ```bash
-./render_headless.sh test.scad my_render.png
+# サンプルモデル生成（STEP/STL/SCAD形式）
+python3 examples/cadquery/cadquery_examples.py
+
+# L字ブラケット生成
+python3 examples/cadquery/l_bracket_camera_mount.py
+
+# レンダリング
+python3 scripts/renderer.py outputs/cadquery/cq_bracket.scad bracket.png
 ```
 
-### 2. Python Script Execution
-
-#### From command line:
+### 3. SolidPythonで3Dモデル生成
 
 ```bash
-python3 openscad_renderer.py <input.scad> <output.png>
+# サンプルモデル生成（3D/2D版のSCADファイル）
+python3 examples/solidpython/solidpython_simple.py
+
+# 3Dレンダリング
+python3 scripts/renderer.py outputs/solidpython/mech_part_3d.scad mech_3d.png
+
+# 2D図面
+python3 scripts/renderer.py outputs/solidpython/mech_part_2d.scad mech_2d.png --projection o
 ```
 
-Example:
-```bash
-python3 openscad_renderer.py test.scad my_render.png
-```
+## 共通モジュールの使用方法
 
-#### Use in Python code:
+### scripts/renderer.py
+
+OpenSCADのheadlessレンダリング機能を提供:
 
 ```python
-from openscad_renderer import OpenSCADRenderer
+from scripts.renderer import OpenSCADRenderer
 
-# Using context manager (recommended)
-with OpenSCADRenderer() as renderer:
-    renderer.render('test.scad', 'output.png')
-
-# With detailed options
 with OpenSCADRenderer(display=99) as renderer:
     renderer.render(
-        scad_file='test.scad',
-        output_file='output.png',
-        imgsize=(1920, 1080),  # Image size
-        colorscheme='Tomorrow',  # Color scheme
-        projection='p',  # 'p'=perspective, 'o'=orthogonal
-        render_mode=True  # True=full render, False=preview
+        scad_file="model.scad",
+        output_file="output.png",
+        imgsize=(1920, 1080),
+        colorscheme="Tomorrow",
+        projection="p"  # "p"=透視投影, "o"=平行投影
     )
 ```
 
-### 3. Advanced Examples
+### scripts/cadquery_utils.py
 
-```bash
-# Render multiple views
-python3 example_advanced.py test.scad views
-
-# Render with different color schemes
-python3 example_advanced.py test.scad colors
-
-# Generate animation frames
-python3 example_advanced.py test.scad animation
-
-# Compare preview and render modes
-python3 example_advanced.py test.scad compare
-
-# Run all examples
-python3 example_advanced.py test.scad all
-```
-
-## SolidPython - Generate 3D Models with Python
-
-SolidPython2 allows you to create 3D models using Python code.
-
-### Installation
-
-```bash
-pip install solidpython2
-```
-
-### Basic Usage
+CadQuery モデルの保存と変換:
 
 ```python
-from solid2 import *
+from scripts.cadquery_utils import save_model_with_openscad_support
+import cadquery as cq
 
-# Create a simple box
-box = cube([10, 10, 10])
+# モデル作成
+model = cq.Workplane("XY").box(10, 10, 10)
 
-# Save to file
-box.save_as_scad("box.scad")
+# STEP/STL/SCAD形式で保存 + 2D投影ファイル生成
+save_model_with_openscad_support(
+    model,
+    "my_model",
+    output_dir="outputs/cadquery",
+    create_projections=True
+)
 ```
 
-### Sample Scripts
+### scripts/solidpython_utils.py
 
-This repository includes two SolidPython samples:
-
-1. `solidpython_simple.py` - Simple examples using standard OpenSCAD functions only
-2. `solidpython_example.py` - Examples using BOSL2 extensions
-
-Execution example:
-
-```bash
-# Generate 3D models and 2D drawings
-python3 solidpython_simple.py
-
-# Render generated SCAD files
-python3 openscad_renderer.py mech_part_3d.scad mech_part_3d.png  # 3D image
-python3 openscad_renderer.py mech_part_2d.scad mech_part_2d.png  # 2D drawing
-```
-
-### Generating 2D Drawings
-
-Use OpenSCAD's `projection()` function to generate 2D drawings from 3D models:
+SolidPythonモデルの保存と2D投影:
 
 ```python
-# Create 3D model with SolidPython
-model_3d = cube([50, 40, 30]) - translate([5, 5, 5])(cube([40, 30, 25]))
+from scripts.solidpython_utils import batch_save_models
+from solid2 import cube
 
-# Generate OpenSCAD code
-scad_code = scad_render(model_3d)
+models = {
+    "box": cube([10, 10, 10]),
+    "sphere": sphere(r=5)
+}
 
-# Create 2D projection version
-projection_code = f"""
-module model_3d() {{
-{scad_code}
-}}
-
-projection(cut=false) model_3d();
-"""
-
-# Save to file and render
-with open("model_2d.scad", "w") as f:
-    f.write(projection_code)
+# 一括保存（3D/2D版のSCADファイル）
+batch_save_models(models, output_dir="outputs/solidpython")
 ```
 
-## Sample Models Generated with SolidPython
+## ファイル形式
 
-The repository includes several generated models:
+### STEP形式 (.step)
+- 業界標準CADフォーマット
+- ロスレス（正確な形状保存）
+- プロフェッショナルCADソフトで編集可能
+- 設計交換に最適
 
-1. **Mechanical Part** (`mech_part_*.scad`) - Base plate with mounting holes, boss, and ribs
-2. **Simple Box** (`simple_box_*.scad`) - Hollow box
-3. **Gear Shape** (`gear_shape_*.scad`) - Gear-like shape with teeth
+### STL形式 (.stl)
+- 3Dプリント標準フォーマット
+- メッシュベースの表現
+- 全てのスライサーソフトでサポート
 
-Each model has both 3D (`*_3d.scad`) and 2D projection (`*_2d.scad`) versions.
+### SCAD形式 (.scad)
+- OpenSCADスクリプト
+- headlessレンダリング可能
+- パラメトリック設計
 
-## CadQuery - Professional CAD Modeling with Python
+## コマンドラインオプション
 
-CadQuery is a Python library for building parametric 3D CAD models using the powerful OCCT (Open Cascade Technology) kernel.
+`scripts/renderer.py`のオプション:
 
-### Installation
+- `--imgsize WIDTH HEIGHT`: 画像サイズ（デフォルト: 1920 1080）
+- `--colorscheme SCHEME`: カラースキーム（Tomorrow, Cornfield, Metallic等）
+- `--projection {p|o}`: 投影タイプ（p=透視投影, o=平行投影）
+- `--preview`: プレビューモード（高速、低品質）
+- `--display NUM`: Xvfbディスプレイ番号（デフォルト: 99）
 
-```bash
-pip install cadquery
-```
+## 開発原則
 
-### Why CadQuery?
+このプロジェクトは以下の原則に従っています:
 
-- **Powerful CAD Kernel**: Uses OCCT, the same kernel used by professional CAD software like FreeCAD
-- **Multiple Export Formats**: STEP, STL, DXF, SVG, AMF, 3MF, and more
-- **Precise Modeling**: Better for mechanical parts and engineering applications compared to OpenSCAD
-- **Parametric Design**: Create designs that can be easily modified by changing parameters
+- **KISS** (Keep It Simple, Stupid): シンプルで理解しやすいコード
+- **DRY** (Don't Repeat Yourself): 共通機能はscripts/にモジュール化
+- **モジュール化**: 再利用可能な関数とクラス
+- **絵文字なし**: ドキュメントとコードには絵文字を使用しない
 
-### Basic Usage
+## サンプル
+
+### 簡単なCadQueryモデル
 
 ```python
 import cadquery as cq
+from scripts.cadquery_utils import save_model_with_openscad_support
 
-# Create a simple bracket
-result = (
+bracket = (
     cq.Workplane("XY")
     .box(80, 60, 10)
-    .faces(">Z")
-    .workplane()
-    .rect(60, 40, forConstruction=True)
-    .vertices()
-    .circle(3)
-    .cutThruAll()
+    .faces(">Z").workplane()
+    .rect(60, 40, forConstruction=True).vertices()
+    .circle(3).cutThruAll()
 )
 
-# Export to various formats
-cq.exporters.export(result, "bracket.step")  # STEP format (CAD software)
-cq.exporters.export(result, "bracket.stl")   # STL format (3D printing)
+save_model_with_openscad_support(bracket, "bracket", "outputs/cadquery")
 ```
 
-### Sample Script
+### 簡単なSolidPythonモデル
 
-This repository includes `cadquery_examples.py` with 5 different models:
+```python
+from solid2 import cube, cylinder, translate
+from scripts.solidpython_utils import save_model_with_2d
 
-1. **Simple Box** - Hollow box with shell operation
-2. **Mechanical Bracket** - Bracket with mounting holes, boss, and fillets
-3. **Parametric Flange** - Flange with bolt circle pattern
-4. **Gear** - Simple gear with teeth
-5. **Lego Brick** - Lego-compatible brick with studs
+base = cube([50, 50, 10], center=True)
+hole = translate([0, 0, 0])(cylinder(h=12, r=5, center=True))
+part = base - hole
 
-Execution example:
-
-```bash
-# Generate all models in multiple formats
-python3 cadquery_examples.py
-
-# This creates:
-# - STEP files (for CAD software like FreeCAD, Fusion 360)
-# - STL files (for 3D printing)
-# - OpenSCAD files (for visualization)
+save_model_with_2d(part, "simple_part", "outputs/solidpython")
 ```
 
-### Export Formats
+## カラースキーム
 
-**STEP Format (.step):**
-- Industry-standard CAD format
-- Preserves exact geometry (lossless)
-- Can be edited in professional CAD software
-- Best for design exchange
+利用可能なカラースキーム:
+- Tomorrow (デフォルト)
+- Cornfield
+- Metallic
+- Sunset
+- Starnight
+- BeforeDawn
+- Nature
+- DeepOcean
 
-**STL Format (.stl):**
-- Standard format for 3D printing
-- Mesh-based representation
-- Supported by all slicing software
+## 参考リンク
 
-**DXF/SVG Formats (.dxf, .svg):**
-- 2D technical drawings
-- For laser cutting or documentation
-- Requires 2D projection of 3D model
-
-### Using CadQuery Models with OpenSCAD
-
-CadQuery models can be rendered using our OpenSCAD renderer:
-
-```bash
-# CadQuery generates an OpenSCAD file that imports the STL
-python3 cadquery_examples.py
-
-# Render the model
-python3 openscad_renderer.py cadquery_outputs/cq_bracket_for_openscad.scad output.png
-```
-
-### Sample Models in cadquery_outputs/
-
-After running `cadquery_examples.py`, you'll find:
-
-- `cq_simple_box.step`, `cq_simple_box.stl` - Hollow box
-- `cq_bracket.step`, `cq_bracket.stl` - Mechanical bracket
-- `cq_flange.step`, `cq_flange.stl` - Parametric flange
-- `cq_gear.step`, `cq_gear.stl` - Gear with teeth
-- `cq_lego_brick.step`, `cq_lego_brick.stl` - Lego-compatible brick
-
-## OpenSCAD Command Line Options
-
-When using OpenSCAD directly:
-
-```bash
-# Start Xvfb
-export DISPLAY=:99
-Xvfb :99 -screen 0 1024x768x24 &
-
-# Render with OpenSCAD
-openscad -o output.png \
-         --render \
-         --imgsize=1920,1080 \
-         --projection=p \
-         --colorscheme=Tomorrow \
-         --viewall \
-         input.scad
-
-# Stop Xvfb
-killall Xvfb
-```
-
-### Main Options
-
-- `-o <file>`: Output file (.png, .stl, .off, .amf, .3mf, etc.)
-- `--render`: Full rendering (using CGAL)
-- `--preview`: Preview mode (faster but lower quality)
-- `--imgsize=<width>,<height>`: Image size
-- `--projection=<p|o>`: Projection method (p=perspective, o=orthogonal)
-- `--colorscheme=<name>`: Color scheme
-- `--viewall`: Auto-adjust camera to fit entire object
-- `--camera=<x,y,z,rotx,roty,rotz,dist>`: Specify camera position
-
-## Available Color Schemes
-
-- `Tomorrow` (default)
-- `Cornfield`
-- `Metallic`
-- `Sunset`
-- `Starnight`
-- `BeforeDawn`
-- `Nature`
-- `DeepOcean`
-
-## References
-
-- [OpenSCAD Official Site](https://openscad.org/)
-- [OpenSCAD Cheatsheet](https://openscad.org/cheatsheet/)
-- [OpenSCAD User Manual](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual)
+- [OpenSCAD公式サイト](https://openscad.org/)
+- [OpenSCADチートシート](https://openscad.org/cheatsheet/)
 - [SolidPython2 GitHub](https://github.com/jeff-dh/SolidPython)
-- [CadQuery Documentation](https://cadquery.readthedocs.io/)
+- [CadQueryドキュメント](https://cadquery.readthedocs.io/)
 - [CadQuery GitHub](https://github.com/CadQuery/cadquery)
+
+## ライセンス
+
+このプロジェクトは個人/教育目的で自由に使用できます。
