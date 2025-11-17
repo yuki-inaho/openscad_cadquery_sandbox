@@ -54,8 +54,8 @@ def create_l_bracket_camera_mount():
     camera_hole_diameter = 3.2
     camera_x_left = -31.5        # 左端から8.5mm（-40 + 8.5 = -31.5）
     camera_x_right = 31.5        # 右端から8.5mm（40 - 8.5 = 31.5）
-    camera_z_bottom = t + 8.0    # 下端から8mm（2 + 8 = 10）
-    camera_z_top = t + 16.0      # 下端から16mm（2 + 16 = 18）
+    camera_z_bottom = t + 13.0   # 下端から13mm（2 + 13 = 15）- 中央寄りに修正
+    camera_z_top = t + 23.0      # 下端から23mm（2 + 23 = 25）- 中央寄りに修正
 
     # 曲げR
     bend_radius = 3.0  # R4以下（少し小さくして安全に）
@@ -144,12 +144,15 @@ def create_l_bracket_camera_mount():
     print(f"    下列 Z={camera_z_bottom}mm, 上列 Z={camera_z_top}mm")
 
     # ====================================================================
-    # ステップ6: フィレット（内側）
+    # ステップ6: フィレット（内側 - 垂直板下端）
     # ====================================================================
     print("[6/7] 内側フィレット適用中...")
     try:
-        # L字内側角のエッジを選択
-        bracket = bracket.edges("|X and >Z and <Y").fillet(bend_radius)
+        # 垂直板下端のエッジを選択（Z=2mm付近、Y=-23mm付近、X方向）
+        # union後、真の内側角（Z=2, Y=-25）にはエッジが存在しないため、
+        # 垂直板下端前面（Z=2, Y=-23）のエッジにフィレットを適用
+        # セレクタ: X方向、Z=2mm付近、Y<0（後ろ側）
+        bracket = bracket.edges("|X and (not >Z) and <Y").fillet(bend_radius)
         print(f"  内側フィレット完了: R{bend_radius}mm")
     except Exception as e:
         print(f"  [WARNING] 内側フィレット失敗: {e}")

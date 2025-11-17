@@ -74,8 +74,8 @@ class LBracketRequirements:
     CAMERA_HOLE_COUNT = 4
     CAMERA_HOLE_X_LEFT = -31.5
     CAMERA_HOLE_X_RIGHT = 31.5
-    CAMERA_HOLE_Z_BOTTOM = 10.0
-    CAMERA_HOLE_Z_TOP = 18.0
+    CAMERA_HOLE_Z_BOTTOM = 15.0  # 中央寄りに修正（角から13mm）
+    CAMERA_HOLE_Z_TOP = 25.0     # 中央寄りに修正（角から23mm）
 
     # 許容誤差
     TOLERANCE_DIMENSION = 0.5  # mm

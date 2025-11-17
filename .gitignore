@@ -35,3 +35,4 @@ outputs/verify_shape/
 outputs/test_requirements/
 outputs/verify_camera_holes/
 outputs/verify_fillet/
+outputs/verify_camera_position/
