@@ -186,37 +186,6 @@ python3 examples/workflow/design_feedback_loop.py
 - バウンディングボックス
 - ファイルサイズとバージョン
 
-## ファイル形式
-
-### STEP形式 (.step)
-- 業界標準CADフォーマット
-- ロスレス（正確な形状保存）
-- プロフェッショナルCADソフトで編集可能
-- 設計交換に最適
-
-### STL形式 (.stl)
-- 3Dプリント標準フォーマット
-- メッシュベースの表現
-- 全てのスライサーソフトでサポート
-
-### SCAD形式 (.scad)
-- OpenSCADスクリプト
-- headlessレンダリング可能
-- パラメトリック設計
-
-### DXF形式 (.dxf)
-- 2D CAD標準フォーマット
-- AutoCAD等の2D CADソフトで編集可能
-- CadQueryでは3Dモデルの2D断面を出力
-- 断面平面: XY（トップビュー）、XZ（フロントビュー）、YZ（サイドビュー）
-- レーザーカット用の図面作成に最適
-
-### SVG形式 (.svg)
-- ベクター画像フォーマット
-- ブラウザで表示可能
-- 3D投影をサポート
-- 技術文書やプレゼンテーションに最適
-
 ## コマンドラインオプション
 
 `scripts/renderer.py`のオプション:
@@ -273,6 +242,46 @@ export_dxf(model, "outputs/top_view.dxf", section_plane="XY")    # トップビ�
 export_dxf(model, "outputs/front_view.dxf", section_plane="XZ")  # フロントビュー
 export_dxf(model, "outputs/side_view.dxf", section_plane="YZ")   # サイドビュー
 ```
+
+### L字ブラケット完全ワークフロー
+
+L字カメラマウントブラケットの生成から解析までの完全なワークフロー:
+
+```bash
+# 1. L字ブラケット生成（STEP/STL/SCAD+2D投影）
+uv run python3 examples/cadquery/l_bracket_camera_mount.py
+
+# 2. 3D画像レンダリング
+uv run python3 scripts/renderer.py \
+  outputs/l_bracket/l_bracket_camera_mount.scad \
+  outputs/l_bracket/l_bracket_camera_mount_3d.png \
+  --imgsize 1920 1080 --colorscheme Tomorrow
+
+# 3. 2D投影画像レンダリング（トップビュー）
+uv run python3 scripts/renderer.py \
+  outputs/l_bracket/l_bracket_camera_mount_2d_top.scad \
+  outputs/l_bracket/l_bracket_camera_mount_2d_top.png \
+  --imgsize 1920 1080 --colorscheme Tomorrow
+
+# 4. 2D投影画像レンダリング（フロントビュー）
+uv run python3 scripts/renderer.py \
+  outputs/l_bracket/l_bracket_camera_mount_2d_front.scad \
+  outputs/l_bracket/l_bracket_camera_mount_2d_front.png \
+  --imgsize 1920 1080 --colorscheme Tomorrow
+
+# 5. 2D投影画像レンダリング（サイドビュー）
+uv run python3 scripts/renderer.py \
+  outputs/l_bracket/l_bracket_camera_mount_2d_side.scad \
+  outputs/l_bracket/l_bracket_camera_mount_2d_side.png \
+  --imgsize 1920 1080 --colorscheme Tomorrow
+```
+
+生成されるファイル:
+- `l_bracket_camera_mount.step` (40KB) - STEP形式（CAD編集可能）
+- `l_bracket_camera_mount.stl` (14KB) - STL形式（3Dプリント用）
+- `l_bracket_camera_mount.scad` - OpenSCADファイル
+- `l_bracket_camera_mount_2d_*.scad` - 2D投影用SCADファイル（3種）
+- `l_bracket_camera_mount_*.png` - レンダリング画像（4種）
 
 ## 参考リンク
 
