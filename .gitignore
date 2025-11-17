@@ -6,6 +6,7 @@
 # Output directories
 outputs/
 animation/
+cadquery_outputs/
 
 # Python
 __pycache__/
@@ -23,11 +24,15 @@ mechanical_part.scad
 box.scad
 gear.scad
 
-# STL files
+# CAD files
 *.stl
+*.step
+*.stp
 *.off
 *.amf
 *.3mf
+*.dxf
+*.svg
 
 # OS
 .DS_Store
