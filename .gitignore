@@ -1,0 +1,34 @@
+# Generated images
+*.png
+*.jpg
+*.jpeg
+
+# Output directories
+outputs/
+animation/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+
+# STL files
+*.stl
+*.off
+*.amf
+*.3mf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
