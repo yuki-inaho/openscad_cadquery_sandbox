@@ -158,14 +158,26 @@ def create_l_bracket_camera_mount():
         print(f"  [WARNING] 内側フィレット失敗: {e}")
 
     # ====================================================================
-    # ステップ7: フィレット（外側エッジ）
+    # ステップ7: フィレット（垂直板上端後ろ）
     # ====================================================================
-    print("[7/7] 外側フィレット適用中...")
+    print("[7/8] 垂直板上端後ろフィレット適用中...")
+    try:
+        # 垂直板上端後ろのエッジを選択（Z=42mm、Y=-25mm、X方向）
+        # "|X and >Z and <Y" で垂直板上端後ろのエッジのみ選択
+        bracket = bracket.edges("|X and >Z and <Y").fillet(edge_radius)
+        print(f"  垂直板上端後ろフィレット完了: R{edge_radius}mm")
+    except Exception as e:
+        print(f"  [WARNING] 垂直板上端後ろフィレット失敗: {e}")
+
+    # ====================================================================
+    # ステップ8: フィレット（水平板外側エッジ）
+    # ====================================================================
+    print("[8/8] 水平板外側フィレット適用中...")
     try:
         bracket = bracket.edges("|Z and >Y").fillet(edge_radius)
-        print(f"  外側フィレット完了: R{edge_radius}mm")
+        print(f"  水平板外側フィレット完了: R{edge_radius}mm")
     except Exception as e:
-        print(f"  [WARNING] 外側フィレット失敗: {e}")
+        print(f"  [WARNING] 水平板外側フィレット失敗: {e}")
 
     print("[INFO] L字ブラケット生成完了\n")
 
