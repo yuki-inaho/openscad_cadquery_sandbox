@@ -16,7 +16,7 @@ from scripts.cadquery_utils import save_model_with_openscad_support
 
 def create_l_bracket_camera_mount():
     """
-    L字カメラマウントブラケットを生成（修正版）
+    L字カメラマウントブラケットを生成（シンプル版）
 
     仕様:
     - 外形: 80mm x 50mm、板厚2.0mm
@@ -24,14 +24,14 @@ def create_l_bracket_camera_mount():
     - 水平板: 三脚取り付け用穴 φ6.5
     - 垂直板: カメラ固定用穴 4-M3
 
-    座標系:
-    - 原点: L字の中心（centered=True使用）
+    座標系（グローバル、原点は水平板中心底面）:
     - X: 幅方向（-40〜+40mm）
-    - Y: 奥行き方向（-26〜+25mm）
-    - Z: 高さ方向（-1〜+21mm）
+    - Y: 奥行き方向（-25〜+25mm）
+    - Z: 高さ方向（0〜42mm）
 
     修正履歴:
     - 2025-11-17: union後に穴を開ける方式に変更（穴消失問題の修正）
+    - 2025-11-17: Workplane("XY")のみ使用、rotate()で回転（座標系シンプル化）
     """
 
     # パラメータ定義
@@ -45,98 +45,112 @@ def create_l_bracket_camera_mount():
     vertical_width = 80.0        # X方向
     vertical_height = 40.0       # Z方向
 
-    # 三脚用穴（水平板）
+    # 三脚用穴（水平板）- グローバル座標
     tripod_hole_diameter = 6.5
-    # centered=True基準での位置（中心からのオフセット）
-    tripod_offset_x = 0.0        # X中央
-    tripod_offset_y = -5.0       # Y中央から-5mm（20-25=-5）
+    tripod_x = 0.0               # X中央
+    tripod_y = -5.0              # 曲げ部から20mm（-25 + 20 = -5）
 
-    # カメラ固定用穴（垂直板）4-M3パターン
-    camera_hole_diameter = 3.2  # M3通し穴
-
-    # centered=True基準での位置（中心からのオフセット）
-    camera_offset_x_left = -31.5   # 8.5 - 40 = -31.5
-    camera_offset_x_right = 31.5   # 71.5 - 40 = 31.5
-    camera_offset_z_bottom = -12.0 # 8 - 20 = -12
-    camera_offset_z_top = -4.0     # 16 - 20 = -4
+    # カメラ固定用穴（垂直板）- グローバル座標
+    camera_hole_diameter = 3.2
+    camera_x_left = -31.5        # 左端から8.5mm（-40 + 8.5 = -31.5）
+    camera_x_right = 31.5        # 右端から8.5mm（40 - 8.5 = 31.5）
+    camera_z_bottom = t + 8.0    # 下端から8mm（2 + 8 = 10）
+    camera_z_top = t + 16.0      # 下端から16mm（2 + 16 = 18）
 
     # 曲げR
-    bend_radius = 4.0
+    bend_radius = 3.0  # R4以下（少し小さくして安全に）
     edge_radius = 1.5
 
-    # ====================================================================
-    # 修正案A: union後に穴を開ける方式
-    # ====================================================================
+    print("[INFO] シンプル版L字ブラケット生成開始（修正版: union後穴開け）")
 
-    print("[INFO] 修正版L字ブラケット生成開始（union後穴あけ方式）")
-
+    # ====================================================================
     # ステップ1: 水平板（穴なし）
-    print("[1/6] 水平板作成中（穴なし）...")
-    horizontal_base = (
+    # ====================================================================
+    print("[1/7] 水平板作成中（穴なし）...")
+    horizontal_plate = (
         cq.Workplane("XY")
-        .box(horizontal_width, horizontal_depth, t, centered=True)
+        .box(horizontal_width, horizontal_depth, t, centered=(True, True, False))
     )
+    print("  水平板作成完了（穴なし）")
 
+    # ====================================================================
     # ステップ2: 垂直板（穴なし）
-    print("[2/6] 垂直板作成中（穴なし）...")
-    vertical_base = (
-        cq.Workplane("XZ")
-        .box(vertical_width, vertical_height, t, centered=True)
-        # 位置調整: Y=-26mm（水平板の後端-2mmと接続）
-        .translate((0, -(horizontal_depth/2 + t/2), vertical_height/2 + t/2))
+    # ====================================================================
+    print("[2/7] 垂直板作成中（穴なし）...")
+    # XY平面で作成してからX軸周りに-90度回転
+    vertical_plate = (
+        cq.Workplane("XY")
+        .box(vertical_width, vertical_height, t, centered=(True, True, False))
+        # X軸周りに-90度回転（XY平面 → XZ平面）
+        .rotate((0, 0, 0), (1, 0, 0), -90)
+        # Y=-25の位置に移動（水平板の後端）
+        .translate((0, -horizontal_depth/2, 0))
     )
+    print("  垂直板作成完了（穴なし）")
 
-    # ステップ3: union（穴なし状態で結合）
-    print("[3/6] 水平板と垂直板をunion中...")
-    bracket = horizontal_base.union(vertical_base)
-    print("[SUCCESS] union完了（穴なし状態）")
+    # ====================================================================
+    # ステップ3: union
+    # ====================================================================
+    print("[3/7] 水平板と垂直板をunion中...")
+    bracket = horizontal_plate.union(vertical_plate)
+    print("  union完了（L字一体構造）")
 
+    # ====================================================================
     # ステップ4: union後に三脚穴を開ける
-    print("[4/6] 三脚穴を開ける中...")
+    # ====================================================================
+    print("[4/7] 三脚穴作成中（union後）...")
     bracket = (
         bracket
-        .faces(">Z")  # 水平板の上面を選択
+        .faces(">Z")
         .workplane()
-        .center(tripod_offset_x, tripod_offset_y)  # (0, -5)
+        .center(tripod_x, tripod_y)
         .circle(tripod_hole_diameter / 2)
         .cutThruAll()
     )
-    print(f"[SUCCESS] 三脚穴完了: φ{tripod_hole_diameter}mm at ({tripod_offset_x}, {tripod_offset_y})")
+    print(f"  三脚穴: φ{tripod_hole_diameter}mm at ({tripod_x}, {tripod_y}, {t})")
 
-    # ステップ5: union後にカメラ固定穴を開ける
-    print("[5/6] カメラ固定穴4個を開ける中...")
+    # ====================================================================
+    # ステップ5: union後にカメラ穴を開ける
+    # ====================================================================
+    print("[5/7] カメラ穴作成中（union後）...")
+    # 注意: faces("<Y").workplane()の座標系ではZ軸が反転するため、負の値を使用
     bracket = (
         bracket
-        .faces("<Y")  # 垂直板の背面を選択
+        .faces("<Y")  # 垂直板の背面（Y=-25の面）
         .workplane()
         .pushPoints([
-            (camera_offset_x_left, camera_offset_z_bottom),   # 左下
-            (camera_offset_x_left, camera_offset_z_top),      # 左上
-            (camera_offset_x_right, camera_offset_z_bottom),  # 右下
-            (camera_offset_x_right, camera_offset_z_top),     # 右上
+            (camera_x_left, -camera_z_bottom),   # 左下（workplane座標系で-Z）
+            (camera_x_left, -camera_z_top),      # 左上
+            (camera_x_right, -camera_z_bottom),  # 右下
+            (camera_x_right, -camera_z_top),     # 右上
         ])
         .circle(camera_hole_diameter / 2)
         .cutThruAll()
     )
-    print(f"[SUCCESS] カメラ穴完了: φ{camera_hole_diameter}mm × 4個")
-    print(f"  左列 X={camera_offset_x_left}mm, 右列 X={camera_offset_x_right}mm")
-    print(f"  下列 Z={camera_offset_z_bottom}mm, 上列 Z={camera_offset_z_top}mm")
+    print(f"  カメラ穴: φ{camera_hole_diameter}mm × 4個")
+    print(f"    左列 X={camera_x_left}mm, 右列 X={camera_x_right}mm")
+    print(f"    下列 Z={camera_z_bottom}mm, 上列 Z={camera_z_top}mm")
 
-    # ステップ6: フィレット
-    print("[6/6] フィレット適用中...")
-    # 内側フィレット
+    # ====================================================================
+    # ステップ6: フィレット（内側）
+    # ====================================================================
+    print("[6/7] 内側フィレット適用中...")
     try:
-        bracket = bracket.edges("|X and <Y and <Z").fillet(bend_radius)
-        print(f"[SUCCESS] 内側フィレット完了: R{bend_radius}mm")
+        # L字内側角のエッジを選択
+        bracket = bracket.edges("|X and >Z and <Y").fillet(bend_radius)
+        print(f"  内側フィレット完了: R{bend_radius}mm")
     except Exception as e:
-        print(f"[WARNING] 内側フィレット失敗: {e}")
+        print(f"  [WARNING] 内側フィレット失敗: {e}")
 
-    # 外側エッジフィレット
+    # ====================================================================
+    # ステップ7: フィレット（外側エッジ）
+    # ====================================================================
+    print("[7/7] 外側フィレット適用中...")
     try:
         bracket = bracket.edges("|Z and >Y").fillet(edge_radius)
-        print(f"[SUCCESS] 外側フィレット完了: R{edge_radius}mm")
+        print(f"  外側フィレット完了: R{edge_radius}mm")
     except Exception as e:
-        print(f"[WARNING] 外側フィレット失敗: {e}")
+        print(f"  [WARNING] 外側フィレット失敗: {e}")
 
     print("[INFO] L字ブラケット生成完了\n")
 

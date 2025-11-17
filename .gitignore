@@ -24,6 +24,10 @@ Thumbs.db
 # Debug files
 debug/
 outputs/debug/
-outputs/debug_axis/
+outputs/debug_*
 outputs/verify/
 outputs/analysis/
+
+# Test files
+outputs/test_simple/
+outputs/tests/

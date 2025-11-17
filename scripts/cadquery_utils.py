@@ -51,7 +51,7 @@ def export_stl(model, output_path: str):
         return False
 
 
-def export_dxf(model, output_path: str, section_plane: str = "XY"):
+def export_dxf(model, output_path: str, section_plane: str = "XY", section_height: float = 0.0):
     """
     DXF形式でエクスポート（2D断面専用）
 
@@ -62,6 +62,7 @@ def export_dxf(model, output_path: str, section_plane: str = "XY"):
         model: CadQueryモデル（3Dまたは2D）
         output_path: 出力ファイルパス
         section_plane: 断面平面 ("XY", "XZ", "YZ")
+        section_height: 断面の高さ（デフォルト: 0.0）
 
     Returns:
         bool: 成功時True
@@ -76,18 +77,35 @@ def export_dxf(model, output_path: str, section_plane: str = "XY"):
 
         # 3Dモデルの場合は断面を取得
         if has_solids:
-            # 平面に応じてモデルを回転
+            # ソリッドを取得して新しいWorkplaneを作成
+            solid = model.val()
+            wp = cq.Workplane("XY").add(solid)
+
+            # 平面に応じてモデルを回転・移動
             if section_plane == "XY":
-                section = model.section()
+                # XY平面（Z方向の断面）
+                if section_height != 0.0:
+                    wp = wp.translate((0, 0, -section_height))
+                section = wp.section()
             elif section_plane == "XZ":
-                section = model.rotate((0,0,0), (1,0,0), 90).section()
+                # XZ平面（Y方向の断面）
+                wp = wp.rotate((0,0,0), (1,0,0), 90)
+                if section_height != 0.0:
+                    wp = wp.translate((0, 0, -section_height))
+                section = wp.section()
             elif section_plane == "YZ":
-                section = model.rotate((0,0,0), (0,1,0), 90).section()
+                # YZ平面（X方向の断面）
+                wp = wp.rotate((0,0,0), (0,1,0), 90)
+                if section_height != 0.0:
+                    wp = wp.translate((0, 0, -section_height))
+                section = wp.section()
             else:
-                section = model.section()
+                if section_height != 0.0:
+                    wp = wp.translate((0, 0, -section_height))
+                section = wp.section()
 
             cq.exporters.export(section, output_path)
-            print(f"[SUCCESS] DXF export ({section_plane} section): {output_path}")
+            print(f"[SUCCESS] DXF export ({section_plane} section, height={section_height}): {output_path}")
         else:
             # 2Dスケッチやワイヤーの場合はそのまま出力
             cq.exporters.export(model, output_path)
