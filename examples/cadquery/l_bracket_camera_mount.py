@@ -74,19 +74,45 @@ def create_l_bracket_camera_mount():
     print("  水平板作成完了（穴なし）")
 
     # ====================================================================
-    # ステップ2: 垂直板（穴なし）
+    # ステップ2: 垂直板（穴あり）
     # ====================================================================
-    print("[2/7] 垂直板作成中（穴なし）...")
-    # XY平面で作成してからX軸周りに-90度回転
+    print("[2/7] 垂直板作成中（穴あり）...")
+    # XY平面で作成し、回転前に穴を開ける
+    # 回転前の座標系でカメラ穴を計算
+    # X軸周りに-90度回転の変換: Y' = Z, Z' = -Y
+    # 回転後にグローバルZ={10, 18}になるように、回転前のY座標を計算:
+    #   Z' = -Y → Y = -Z'
+    # グローバルZ=10（translate後） → translate前Z'=10-22=-12 → 回転前Y=-(-12)=12
+    # しかし、これは複雑なので、直接計算:
+    # 回転後のZ = translate前のZ + 22
+    # translate前のZ = -回転前のY
+    # したがって: 回転後のZ = -回転前のY + 22
+    # → 回転前のY = 22 - 回転後のZ
+    vertical_plate_before_rotation_y_bottom = vertical_height/2 + t - camera_z_bottom  # 22 - 10 = 12
+    vertical_plate_before_rotation_y_top = vertical_height/2 + t - camera_z_top        # 22 - 18 = 4
+
     vertical_plate = (
         cq.Workplane("XY")
         .box(vertical_width, vertical_height, t, centered=(True, True, False))
+        # 回転前に穴を開ける
+        .faces(">Z")  # 上面（Z=2の面）
+        .workplane()
+        .pushPoints([
+            (camera_x_left, vertical_plate_before_rotation_y_bottom),   # 左下（回転後Z=10）
+            (camera_x_left, vertical_plate_before_rotation_y_top),      # 左上（回転後Z=18）
+            (camera_x_right, vertical_plate_before_rotation_y_bottom),  # 右下（回転後Z=10）
+            (camera_x_right, vertical_plate_before_rotation_y_top),     # 右上（回転後Z=18）
+        ])
+        .circle(camera_hole_diameter / 2)
+        .cutThruAll()
         # X軸周りに-90度回転（XY平面 → XZ平面）
         .rotate((0, 0, 0), (1, 0, 0), -90)
-        # Y=-25の位置に移動（水平板の後端）
-        .translate((0, -horizontal_depth/2, 0))
+        # Y=-25の位置、Z=22mmに移動（水平板の後端、上端から立つL字形状）
+        # Z移動量 = vertical_height/2 + t = 40/2 + 2 = 22mm
+        .translate((0, -horizontal_depth/2, vertical_height/2 + t))
     )
-    print("  垂直板作成完了（穴なし）")
+    print("  垂直板作成完了（穴あり）")
+    print(f"    カメラ穴（回転前Y座標）: {vertical_plate_before_rotation_y_bottom}, {vertical_plate_before_rotation_y_top}")
 
     # ====================================================================
     # ステップ3: union
@@ -110,23 +136,9 @@ def create_l_bracket_camera_mount():
     print(f"  三脚穴: φ{tripod_hole_diameter}mm at ({tripod_x}, {tripod_y}, {t})")
 
     # ====================================================================
-    # ステップ5: union後にカメラ穴を開ける
+    # ステップ5: （スキップ - カメラ穴は垂直板作成時に開け済み）
     # ====================================================================
-    print("[5/7] カメラ穴作成中（union後）...")
-    # 注意: faces("<Y").workplane()の座標系ではZ軸が反転するため、負の値を使用
-    bracket = (
-        bracket
-        .faces("<Y")  # 垂直板の背面（Y=-25の面）
-        .workplane()
-        .pushPoints([
-            (camera_x_left, -camera_z_bottom),   # 左下（workplane座標系で-Z）
-            (camera_x_left, -camera_z_top),      # 左上
-            (camera_x_right, -camera_z_bottom),  # 右下
-            (camera_x_right, -camera_z_top),     # 右上
-        ])
-        .circle(camera_hole_diameter / 2)
-        .cutThruAll()
-    )
+    print("[5/7] カメラ穴作成完了（垂直板作成時に開け済み）...")
     print(f"  カメラ穴: φ{camera_hole_diameter}mm × 4個")
     print(f"    左列 X={camera_x_left}mm, 右列 X={camera_x_right}mm")
     print(f"    下列 Z={camera_z_bottom}mm, 上列 Z={camera_z_top}mm")

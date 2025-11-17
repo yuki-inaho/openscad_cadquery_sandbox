@@ -33,3 +33,4 @@ outputs/test_simple/
 outputs/tests/
 outputs/verify_shape/
 outputs/test_requirements/
+outputs/verify_camera_holes/
