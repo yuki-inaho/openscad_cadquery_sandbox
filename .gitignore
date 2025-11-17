@@ -16,6 +16,13 @@ __pycache__/
 .venv/
 venv/
 
+# Generated SCAD files (keep examples)
+*_3d.scad
+*_2d.scad
+mechanical_part.scad
+box.scad
+gear.scad
+
 # STL files
 *.stl
 *.off
