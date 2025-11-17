@@ -281,7 +281,3 @@ export_dxf(model, "outputs/side_view.dxf", section_plane="YZ")   # サイドビ�
 - [SolidPython2 GitHub](https://github.com/jeff-dh/SolidPython)
 - [CadQueryドキュメント](https://cadquery.readthedocs.io/)
 - [CadQuery GitHub](https://github.com/CadQuery/cadquery)
-
-## ライセンス
-
-このプロジェクトは個人/教育目的で自由に使用できます。
