@@ -169,15 +169,6 @@ batch_save_models(models, output_dir="outputs/solidpython")
 - `--preview`: プレビューモード（高速、低品質）
 - `--display NUM`: Xvfbディスプレイ番号（デフォルト: 99）
 
-## 開発原則
-
-このプロジェクトは以下の原則に従っています:
-
-- **KISS** (Keep It Simple, Stupid): シンプルで理解しやすいコード
-- **DRY** (Don't Repeat Yourself): 共通機能はscripts/にモジュール化
-- **モジュール化**: 再利用可能な関数とクラス
-- **絵文字なし**: ドキュメントとコードには絵文字を使用しない
-
 ## サンプル
 
 ### 簡単なCadQueryモデル
@@ -209,18 +200,6 @@ part = base - hole
 
 save_model_with_2d(part, "simple_part", "outputs/solidpython")
 ```
-
-## カラースキーム
-
-利用可能なカラースキーム:
-- Tomorrow (デフォルト)
-- Cornfield
-- Metallic
-- Sunset
-- Starnight
-- BeforeDawn
-- Nature
-- DeepOcean
 
 ## 参考リンク
 
